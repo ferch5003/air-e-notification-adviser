@@ -2,3 +2,10 @@
 .idea
 
 air-e-notification-adviser.iml
+
+# Environments
+.env
+.env.prod
+
+# Coverage
+profile.cov

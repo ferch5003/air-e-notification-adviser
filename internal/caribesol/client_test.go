@@ -1,6 +1,7 @@
 package caribesol
 
 import (
+	"air-e-notification-adviser/config"
 	"air-e-notification-adviser/internal/caribesol/caribesoltest"
 	"air-e-notification-adviser/internal/caribesol/dto"
 	"context"
@@ -13,13 +14,15 @@ func TestClient_GetNICSuccessfulRequest(t *testing.T) {
 	defer server.Close()
 
 	// Given
-	t.Setenv("CARIBE_SOL_BASE_URL", server.URL)
+	cfg := &config.EnvVars{
+		CaribeSolBaseURL: server.URL,
+	}
 
 	caribeSolBody := dto.ConsultarNICDTORequest{}
-	caribeSolClient := NewClient()
+	caribeSolClient := NewClient(context.Background(), cfg)
 
 	// When
-	response, err := caribeSolClient.GetNIC(context.Background(), caribeSolBody)
+	response, err := caribeSolClient.GetNIC(caribeSolBody)
 
 	// Then
 	require.NoError(t, err)
@@ -32,13 +35,15 @@ func TestClient_GetNICErrorWrongURL(t *testing.T) {
 	defer server.Close()
 
 	// Given
-	t.Setenv("CARIBE_SOL_BASE_URL", "not_exist")
+	cfg := &config.EnvVars{
+		CaribeSolBaseURL: "not_exist",
+	}
 
 	caribeSolBody := dto.ConsultarNICDTORequest{}
-	caribeSolClient := NewClient()
+	caribeSolClient := NewClient(context.Background(), cfg)
 
 	// When
-	_, err := caribeSolClient.GetNIC(context.Background(), caribeSolBody)
+	_, err := caribeSolClient.GetNIC(caribeSolBody)
 
 	// Then
 	require.ErrorContains(t, err, "unsupported protocol scheme")

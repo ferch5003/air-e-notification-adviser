@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/air-e-notification-adviser.iml" filepath="$PROJECT_DIR$/air-e-notification-adviser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/air-e-notification-adviser.iml" filepath="$PROJECT_DIR$/.idea/air-e-notification-adviser.iml" />
     </modules>
   </component>
 </project>

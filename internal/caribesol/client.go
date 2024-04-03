@@ -1,6 +1,7 @@
 package caribesol
 
 import (
+	"air-e-notification-adviser/config"
 	"air-e-notification-adviser/internal/caribesol/dto"
 	"bytes"
 	"context"
@@ -9,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -17,24 +17,26 @@ const _serviceAPIPath = "service/api.php"
 
 type Client interface {
 	// GetNIC returns a response for the notifications provided by Air-E.
-	GetNIC(ctx context.Context, body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error)
+	GetNIC(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error)
 }
 
 type client struct {
+	ctx        context.Context
 	baseUrl    string
 	httpClient http.Client
 }
 
-func NewClient() Client {
+func NewClient(ctx context.Context, cfg *config.EnvVars) Client {
 	return client{
-		baseUrl: os.Getenv("CARIBE_SOL_BASE_URL"),
+		ctx:     ctx,
+		baseUrl: cfg.CaribeSolBaseURL,
 		httpClient: http.Client{
 			Timeout: 30 * time.Second,
 		},
 	}
 }
 
-func (c client) GetNIC(ctx context.Context, body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error) {
+func (c client) GetNIC(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error) {
 	var jsonData []byte
 	if data, err := json.Marshal(body); err != nil {
 
@@ -43,7 +45,7 @@ func (c client) GetNIC(ctx context.Context, body dto.ConsultarNICDTORequest) (dt
 	}
 
 	caribeSolEndpoint := fmt.Sprintf("%s/%s?rquest=consultar_nic", c.baseUrl, _serviceAPIPath)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, caribeSolEndpoint, bytes.NewReader(jsonData))
+	req, err := http.NewRequestWithContext(c.ctx, http.MethodPost, caribeSolEndpoint, bytes.NewReader(jsonData))
 	if err != nil {
 		return dto.ConsultarNICDTOResponse{}, err
 	}
