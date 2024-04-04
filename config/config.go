@@ -4,15 +4,29 @@ import (
 	"air-e-notification-adviser/internal/platform/files"
 	"github.com/joho/godotenv"
 	"os"
+	"strconv"
 )
 
 type EnvVars struct {
 	// App Data.
 	AppName          string
 	CaribeSolBaseURL string
+	SearchNICCron    string
 
-	// Data
-	NIC string
+	// Data.
+	NIC  string
+	Tipo string
+
+	// SMTP.
+	SMTPHost        string
+	SMTPPort        int
+	SMTPUsername    string
+	SMTPPassword    string
+	SMTPFromAddress string
+
+	// Mail.
+	FromMail string
+	ToMail   string
 }
 
 func NewConfigurations() (*EnvVars, error) {
@@ -27,12 +41,42 @@ func NewConfigurations() (*EnvVars, error) {
 
 	appName := os.Getenv("APP_NAME")
 	caribeSolBaseURL := os.Getenv("CARIBE_SOL_BASE_URL")
+	searchNICCron := os.Getenv("SEARCH_NIC_CRON")
+
 	nic := os.Getenv("NIC")
+	tipo := os.Getenv("TIPO")
+
+	smtpHost := os.Getenv("SMTP_HOST")
+	port := os.Getenv("SMTP_PORT")
+
+	smtpPort, err := strconv.Atoi(port)
+	if err != nil {
+		return nil, err
+	}
+
+	smtpUsername := os.Getenv("SMTP_USERNAME")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	smtpFromAddress := os.Getenv("SMTP_FROM_ADDRESS")
+
+	fromMail := os.Getenv("FROM_MAIL")
+	toMail := os.Getenv("TO_MAIL")
 
 	environment := &EnvVars{
 		AppName:          appName,
 		CaribeSolBaseURL: caribeSolBaseURL,
-		NIC:              nic,
+		SearchNICCron:    searchNICCron,
+
+		NIC:  nic,
+		Tipo: tipo,
+
+		SMTPHost:        smtpHost,
+		SMTPPort:        smtpPort,
+		SMTPUsername:    smtpUsername,
+		SMTPPassword:    smtpPassword,
+		SMTPFromAddress: smtpFromAddress,
+
+		FromMail: fromMail,
+		ToMail:   toMail,
 	}
 
 	return environment, nil

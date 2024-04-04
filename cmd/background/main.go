@@ -9,6 +9,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"sync"
 )
 
 func main() {
@@ -27,6 +28,8 @@ func main() {
 		fx.Supply(configurations),
 		// creates: *zap.Logger
 		fx.Supply(logger),
+		// creates: *sync.WaitGroup
+		fx.Supply(&sync.WaitGroup{}),
 
 		// creates: context.Context
 		fx.Provide(context.Background),
@@ -36,6 +39,8 @@ func main() {
 		fx.Provide(caribesol.NewClient),
 		// creates: *notifications.Worker
 		fx.Provide(notifications.NewWorker),
+		// creates: *jobs.Mail
+		fx.Provide(jobs.NewMail),
 		// creates: *jobs.Worker
 		fx.Provide(jobs.NewWorker),
 

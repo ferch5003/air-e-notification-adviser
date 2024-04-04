@@ -77,7 +77,7 @@ func (c client) GetNIC(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResp
 
 	apiResponseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		// handle error
+		return dto.ConsultarNICDTOResponse{}, err
 	}
 
 	var caribeSolResponse dto.ConsultarNICDTOResponse

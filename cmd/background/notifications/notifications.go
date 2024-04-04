@@ -5,13 +5,12 @@ import (
 	"air-e-notification-adviser/internal/caribesol"
 	"air-e-notification-adviser/internal/caribesol/dto"
 	"context"
-	"fmt"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 )
 
-// searchNICCronSpec is the time to run the job to search NIC every minute.
-const searchNICCronSpec = "* * * * *"
+// defaultSearchNICCronSpec is the time to run the job to search NIC at 12:00.
+const defaultSearchNICCronSpec = "0 12 * * *"
 
 type Worker struct {
 	ctx             context.Context
@@ -43,7 +42,12 @@ func NewWorker(
 }
 
 func (w Worker) Start() (int, error) {
-	entryID, err := w.cron.AddFunc(searchNICCronSpec, w.searchCaribeSolAPIJob)
+	cronSpec := defaultSearchNICCronSpec
+	if w.cfg.SearchNICCron != "" {
+		cronSpec = w.cfg.SearchNICCron
+	}
+
+	entryID, err := w.cron.AddFunc(cronSpec, w.searchCaribeSolAPIJob)
 	if err != nil {
 		return 0, err
 	}
@@ -54,15 +58,13 @@ func (w Worker) Start() (int, error) {
 func (w Worker) searchCaribeSolAPIJob() {
 	caribesolReq := dto.ConsultarNICDTORequest{
 		NIC:  w.cfg.NIC,
-		Tipo: dto.NICTipo,
+		Tipo: dto.Tipo(w.cfg.Tipo),
 	}
 
 	response, err := w.caribeSolClient.GetNIC(caribesolReq)
 	if err != nil {
 		w.ErrorChan <- err
 	}
-
-	w.logger.Info(fmt.Sprintf("Data: %v", response))
 
 	w.ResponseChan <- response
 }
