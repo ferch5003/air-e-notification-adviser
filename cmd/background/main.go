@@ -3,6 +3,7 @@ package main
 import (
 	"air-e-notification-adviser/cmd/background/jobs"
 	"air-e-notification-adviser/cmd/background/notifications"
+	"air-e-notification-adviser/cmd/background/web"
 	"air-e-notification-adviser/config"
 	"air-e-notification-adviser/internal/caribesol"
 	"context"
@@ -22,6 +23,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	go web.StartServer(configurations)
 
 	app := fx.New(
 		// creates: config.EnvVars

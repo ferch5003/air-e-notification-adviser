@@ -10,6 +10,7 @@ import (
 type EnvVars struct {
 	// App Data.
 	AppName          string
+	Port             string
 	CaribeSolBaseURL string
 	SearchNICCron    string
 
@@ -44,6 +45,11 @@ func NewConfigurations() (*EnvVars, error) {
 	}
 
 	appName := os.Getenv("APP_NAME")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	caribeSolBaseURL := os.Getenv("CARIBE_SOL_BASE_URL")
 	searchNICCron := os.Getenv("SEARCH_NIC_CRON")
 
@@ -51,9 +57,9 @@ func NewConfigurations() (*EnvVars, error) {
 	tipo := os.Getenv("TIPO")
 
 	smtpHost := os.Getenv("SMTP_HOST")
-	port := os.Getenv("SMTP_PORT")
+	stmStrPort := os.Getenv("SMTP_PORT")
 
-	smtpPort, err := strconv.Atoi(port)
+	smtpPort, err := strconv.Atoi(stmStrPort)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +73,7 @@ func NewConfigurations() (*EnvVars, error) {
 
 	environment := &EnvVars{
 		AppName:          appName,
+		Port:             port,
 		CaribeSolBaseURL: caribeSolBaseURL,
 		SearchNICCron:    searchNICCron,
 

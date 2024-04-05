@@ -17,29 +17,30 @@ import (
 )
 
 type Worker struct {
-	Mailer        *Mail
-	Wait          *sync.WaitGroup
-	ErrorChan     chan error
-	ErrorChanDone chan bool
+	Mailer             *Mail
+	NotificationWorker *notifications.Worker
+	Wait               *sync.WaitGroup
+	ErrorChan          chan error
+	ErrorChanDone      chan bool
 }
 
-func NewWorker(mailer *Mail, wg *sync.WaitGroup) *Worker {
+func NewWorker(mailer *Mail, notificationWorker *notifications.Worker, wg *sync.WaitGroup) *Worker {
 	return &Worker{
-		Mailer:        mailer,
-		Wait:          wg,
-		ErrorChan:     make(chan error),
-		ErrorChanDone: make(chan bool),
+		Mailer:             mailer,
+		NotificationWorker: notificationWorker,
+		Wait:               wg,
+		ErrorChan:          make(chan error),
+		ErrorChanDone:      make(chan bool),
 	}
 }
 
 // listenForNotifications listens for incoming notifications from CaribeSol API.
 func (w *Worker) listenForNotifications(
 	cfg *config.EnvVars,
-	notificationsWorker *notifications.Worker,
 	logger *zap.Logger) {
 	for {
 		select {
-		case response := <-notificationsWorker.ResponseChan:
+		case response := <-w.NotificationWorker.ResponseChan:
 			t := time.Now()
 
 			// print location and local time
@@ -101,6 +102,10 @@ func (w *Worker) shutdown() {
 	close(w.Mailer.MailerChan)
 	close(w.Mailer.ErrorChan)
 	close(w.Mailer.DoneChan)
+	close(w.NotificationWorker.DoneChan)
+	close(w.NotificationWorker.ErrorChan)
+	close(w.NotificationWorker.ResponseChan)
+	close(w.Mailer.DoneChan)
 	close(w.ErrorChan)
 	close(w.ErrorChanDone)
 }
@@ -110,7 +115,6 @@ func Start(
 	cfg *config.EnvVars,
 	c *cron.Cron,
 	mainWorker *Worker,
-	notificationsWorker *notifications.Worker,
 	logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
@@ -118,12 +122,12 @@ func Start(
 
 			go mainWorker.listenForMail(logger)
 
-			go mainWorker.listenForNotifications(cfg, notificationsWorker, logger)
+			go mainWorker.listenForNotifications(cfg, logger)
 
 			go func() {
 				logger.Info("Starting...")
 
-				id, err := notificationsWorker.Start()
+				id, err := mainWorker.NotificationWorker.Start()
 				if err != nil {
 					logger.Info("err: ", zap.Error(err))
 				}
