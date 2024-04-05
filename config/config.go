@@ -30,13 +30,17 @@ type EnvVars struct {
 }
 
 func NewConfigurations() (*EnvVars, error) {
-	envFilepath, err := files.GetFile(".env")
-	if err != nil {
-		return nil, err
-	}
+	area := os.Getenv("AREA")
 
-	if err := godotenv.Load(envFilepath); err != nil {
-		return nil, err
+	if area == "" {
+		envFilepath, err := files.GetFile(".env")
+		if err != nil {
+			return nil, err
+		}
+
+		if err := godotenv.Load(envFilepath); err != nil {
+			return nil, err
+		}
 	}
 
 	appName := os.Getenv("APP_NAME")

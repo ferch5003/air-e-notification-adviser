@@ -32,17 +32,6 @@ func NewWorker(mailer *Mail, wg *sync.WaitGroup) *Worker {
 	}
 }
 
-// listenForShutdown listens for SIGINT and SIGTERM signals and calls the shutdown
-// function when they are received. This prevents goroutines to stop immediately and
-// let them finish their jobs first, like sending and email, etc.
-// IMPORTANT NOTE: One of main part of concurrency.
-func (w *Worker) listenForShutdown() {
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	w.shutdown()
-}
-
 // listenForNotifications listens for incoming notifications from CaribeSol API.
 func (w *Worker) listenForNotifications(
 	cfg *config.EnvVars,
@@ -84,6 +73,17 @@ func (w *Worker) listenForNotifications(
 			return
 		}
 	}
+}
+
+// listenForShutdown listens for SIGINT and SIGTERM signals and calls the shutdown
+// function when they are received. This prevents goroutines to stop immediately and
+// let them finish their jobs first, like sending and email, etc.
+// IMPORTANT NOTE: One of main part of concurrency.
+func (w *Worker) listenForShutdown() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	w.shutdown()
 }
 
 func (w *Worker) shutdown() {
