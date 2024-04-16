@@ -5,6 +5,7 @@ import (
 	"air-e-notification-adviser/internal/caribesol/dto"
 	"air-e-notification-adviser/internal/platform/files"
 	"bytes"
+	"fmt"
 	"go.uber.org/zap"
 	"gopkg.in/gomail.v2"
 	"sync"
@@ -31,9 +32,9 @@ func NewMail(cfg *config.EnvVars, wg *sync.WaitGroup) *Mail {
 	return &Mail{
 		Host:        cfg.SMTPHost,
 		Port:        cfg.SMTPPort,
-		Username:    cfg.SMTPHost,
-		Password:    cfg.SMTPHost,
-		FromAddress: cfg.SMTPHost,
+		Username:    cfg.SMTPUsername,
+		Password:    cfg.SMTPPassword,
+		FromAddress: cfg.SMTPFromAddress,
 		Wait:        wg,
 		MailerChan:  make(chan Message, 100),
 		ErrorChan:   make(chan error),
@@ -41,14 +42,20 @@ func NewMail(cfg *config.EnvVars, wg *sync.WaitGroup) *Mail {
 	}
 }
 
+type Data struct {
+	ConsultarNICDTOResponse dto.ConsultarNICDTOResponse
+	Datetime                string
+}
+
 type Message struct {
 	From    string
 	To      string
 	Subject string
-	Data    struct {
-		ConsultarNICDTOResponse dto.ConsultarNICDTOResponse
-		Datetime                string
-	}
+	Data    Data
+}
+
+func (d Data) ShowFullHistorial() string {
+	return fmt.Sprintf("%+v", d.ConsultarNICDTOResponse.Historial)
 }
 
 // listenForMail is a function to listen for messages on the MailerChan.

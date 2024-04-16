@@ -3,6 +3,6 @@ Este es la notificación de las {{.Datetime}}
 
 Estado: {{.ConsultarNICDTOResponse.Estado}}
 Mensaje: {{.ConsultarNICDTOResponse.Msg}}
-Historial: {{.ConsultarNICDTOResponse.Historial}}
+Historial: {{.ShowFullHistorial}}
 
 {{end}}

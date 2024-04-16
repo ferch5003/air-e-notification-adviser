@@ -15,9 +15,17 @@ import (
 
 const _serviceAPIPath = "service/api.php"
 
+const (
+	_searchNICQueryParam           = "rquest=consultar_nic"
+	_searchNotificationsQueryParam = "rquest=notificaciones_nic"
+)
+
 type Client interface {
-	// GetNIC returns a response for the notifications provided by Air-E.
+	// GetNIC returns a response for the NIC provided by Air-E.
 	GetNIC(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error)
+
+	// GetNotifications returns a response for the notifications provided by Air-E.
+	GetNotifications(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error)
 }
 
 type client struct {
@@ -39,12 +47,30 @@ func NewClient(ctx context.Context, cfg *config.EnvVars) Client {
 func (c client) GetNIC(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error) {
 	var jsonData []byte
 	if data, err := json.Marshal(body); err != nil {
-
+		return dto.ConsultarNICDTOResponse{}, err
 	} else {
 		jsonData = data
 	}
 
-	caribeSolEndpoint := fmt.Sprintf("%s/%s?rquest=consultar_nic", c.baseUrl, _serviceAPIPath)
+	caribeSolEndpoint := fmt.Sprintf("%s/%s?%s", c.baseUrl, _serviceAPIPath, _searchNICQueryParam)
+
+	return c.getAPIResponse(jsonData, caribeSolEndpoint)
+}
+
+func (c client) GetNotifications(body dto.ConsultarNICDTORequest) (dto.ConsultarNICDTOResponse, error) {
+	var jsonData []byte
+	if data, err := json.Marshal(body); err != nil {
+		return dto.ConsultarNICDTOResponse{}, err
+	} else {
+		jsonData = data
+	}
+
+	caribeSolEndpoint := fmt.Sprintf("%s/%s?%s", c.baseUrl, _serviceAPIPath, _searchNotificationsQueryParam)
+
+	return c.getAPIResponse(jsonData, caribeSolEndpoint)
+}
+
+func (c client) getAPIResponse(jsonData []byte, caribeSolEndpoint string) (dto.ConsultarNICDTOResponse, error) {
 	req, err := http.NewRequestWithContext(c.ctx, http.MethodPost, caribeSolEndpoint, bytes.NewReader(jsonData))
 	if err != nil {
 		return dto.ConsultarNICDTOResponse{}, err

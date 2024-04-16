@@ -47,7 +47,7 @@ func (w Worker) Start() (int, error) {
 		cronSpec = w.cfg.SearchNICCron
 	}
 
-	entryID, err := w.cron.AddFunc(cronSpec, w.searchCaribeSolAPIJob)
+	entryID, err := w.cron.AddFunc(cronSpec, w.SearchCaribeSolAPIJob)
 	if err != nil {
 		return 0, err
 	}
@@ -55,16 +55,32 @@ func (w Worker) Start() (int, error) {
 	return int(entryID), nil
 }
 
-func (w Worker) searchCaribeSolAPIJob() {
+func (w Worker) SearchCaribeSolAPIJob() {
 	caribesolReq := dto.ConsultarNICDTORequest{
 		NIC:  w.cfg.NIC,
 		Tipo: dto.Tipo(w.cfg.Tipo),
 	}
 
-	response, err := w.caribeSolClient.GetNIC(caribesolReq)
+	searchNICResponse, err := w.caribeSolClient.GetNIC(caribesolReq)
 	if err != nil {
 		w.ErrorChan <- err
+
+		return
 	}
 
-	w.ResponseChan <- response
+	var searchNotificationsResponse dto.ConsultarNICDTOResponse
+	if searchNICResponse.Estado != "0" {
+		searchNotificationsResponse, err = w.caribeSolClient.GetNotifications(caribesolReq)
+		if err != nil {
+			w.ErrorChan <- err
+
+			return
+		}
+
+		w.ResponseChan <- searchNotificationsResponse
+
+		return
+	}
+
+	w.ResponseChan <- searchNICResponse
 }
