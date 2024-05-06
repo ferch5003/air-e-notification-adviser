@@ -1,12 +1,29 @@
 # air-e-notification-adviser
 
-## Proyecto en ALPHA
+El proyecto es para enviar correos de Notificaciones por aviso (Proceso de Recurso de Reposición) a 
+algún correo en especifico. Tiene algunas variables de entorno para configurar del lado del servidor, 
+habria que crear un archivo `.env` en la raiz delproyecto con las variables del `.env.local` para 
+probar en local.
 
-El dicho descansas como si chambearas se lo tomo muy en serio Air-E.
+En el momento de modificar el `.env` a tener en cuenta:
 
-El proyecto es un notificador de reclamos para enviar la info al correo. Tiene algunas variables de
-entorno para configurar del lado del servidor, habria que crear un archivo `.env` en la raiz del
-proyecto con las variables del `.env.local` para probar en local.
+CRON:
+```
+SEARCH_NIC_CRON='* 0,12 * * *' // Para recibir el correo en dos momentos del dia (12AM y 12PM).
+```
+
+NIC:
+```
+NIC=unknown // Puede ser el NIC del recibo (Si se escoge TIPO=1) o Número de documento (Si se escoge TIPO=2)
+TIPO=unknown // 1 = NIC, 2 = Número de documento 
+```
+
+MAIL:
+```
+SMTP_FROM_ADDRESS=unknown // Desde que correo se envia.
+FROM_MAIL=unknown // Desde que correo se envia (Se sugiere mismo que FROM_MAIL).
+TO_MAIL=unknown // A que correo enviar.
+```
 
 El correo que se envia tiene este formato:
 
